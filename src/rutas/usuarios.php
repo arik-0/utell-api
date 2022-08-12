@@ -13,8 +13,8 @@ $app->get('/api/usuarios', function(Request $request, Response $response){
     $resultado = $db->query($sql);
 
     if ($resultado->rowCount() > 0){
-      $clientes = $resultado->fetchAll(PDO::FETCH_OBJ);
-      echo json_encode($clientes);
+      $usuarios = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($usuarios);
     }else {
       echo json_encode("No existen clientes en la BBDD.");
     }
@@ -33,8 +33,8 @@ $app->get('/api/universidades', function(Request $request, Response $response){
     $resultado = $db->query($sql);
 
     if ($resultado->rowCount() > 0){
-      $clientes = $resultado->fetchAll(PDO::FETCH_OBJ);
-      echo json_encode($clientes);
+      $universidades = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($universidades);
     }else {
       echo json_encode("No existen universidades en la BBDD.");
     }
@@ -53,8 +53,8 @@ $app->get('/api/carreras', function(Request $request, Response $response){
     $resultado = $db->query($sql);
 
     if ($resultado->rowCount() > 0){
-      $clientes = $resultado->fetchAll(PDO::FETCH_OBJ);
-      echo json_encode($clientes);
+      $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($carreras);
     }else {
       echo json_encode("No existen carreras en la BBDD.");
     }
@@ -64,6 +64,146 @@ $app->get('/api/carreras', function(Request $request, Response $response){
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 }); 
+
+$app->get('/api/sedes', function(Request $request, Response $response){
+  $sql = "SELECT * FROM sedes";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+
+    if ($resultado->rowCount() > 0){
+      $sedes = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($sedes);
+    }else {
+      echo json_encode("No existen sedes en la BBDD.");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+
+$app->get('/api/consultas', function(Request $request, Response $response){
+  $sql = "SELECT * FROM consultas";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+
+    if ($resultado->rowCount() > 0){
+      $consultas = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($consultas);
+    }else {
+      echo json_encode("No existen consultas en la BBDD.");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+
+$app->get('/api/favoritos', function(Request $request, Response $response){
+  $sql = "SELECT * FROM favoritos";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+
+    if ($resultado->rowCount() > 0){
+      $favoritos = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($favoritos);
+    }else {
+      echo json_encode("No existen consultas en la BBDD.");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+
+$app->get('/api/paises', function(Request $request, Response $response){
+  $sql = "SELECT * FROM paises";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+
+    if ($resultado->rowCount() > 0){
+      $paises = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($paises);
+    }else {
+      echo json_encode("No existen consultas en la BBDD.");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+
+$app->get('/api/provincias', function(Request $request, Response $response){
+  $sql = "SELECT * FROM provincias";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+
+    if ($resultado->rowCount() > 0){
+      $provincias = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($provincias);
+    }else {
+      echo json_encode("No existen consultas en la BBDD.");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+
+$app->get('/api/ciudades', function(Request $request, Response $response){
+  $sql = "SELECT * FROM ciudades";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+
+    if ($resultado->rowCount() > 0){
+      $ciudades = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($ciudades);
+    }else {
+      echo json_encode("No existen consultas en la BBDD.");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+
+$app->get('/api/mensajedirecto', function(Request $request, Response $response){
+  $sql = "SELECT * FROM mensajedirecto";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+
+    if ($resultado->rowCount() > 0){
+      $mensajedirecto = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($mensajedirecto);
+    }else {
+      echo json_encode("No existen consultas en la BBDD.");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
 
 // GET Recueperar cliente por ID 
 $app->get('/api/usuarios/{id}', function(Request $request, Response $response){
@@ -89,7 +229,7 @@ $app->get('/api/usuarios/{id}', function(Request $request, Response $response){
 
 
 // POST Crear nuevo cliente 
-$app->post('/api/clientes/nuevo', function(Request $request, Response $response){
+$app->post('/api/usuarios/nuevo', function(Request $request, Response $response){
    $nombre = $request->getParam('nombre');
    $apellidos = $request->getParam('apellidos');
    $telefono = $request->getParam('telefono');
