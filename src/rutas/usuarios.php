@@ -236,7 +236,7 @@ $app->get('/api/usuarios/{id}', function(Request $request, Response $response){
       $usuario = $resultado->fetchAll(PDO::FETCH_OBJ);
       echo json_encode($usuario);
     }else {
-      echo json_encode("No existen usuario en la BBDD con este ID.");
+      echo json_encode("No existen usuarios en la BBDD con este ID.");
     }
     $resultado = null;
     $db = null;
@@ -374,4 +374,108 @@ $app->delete('/api/usuarios/delete/{id}', function(Request $request, Response $r
   }
 }); 
 
+$app->post('/api/login', function(Request $request, Response $response){
+  // ok postman
+  $email = $request->getParam('email');
+  $password = $request->getParam('password');
+
+  $sql = "SELECT nombre, apellido FROM usuarios WHERE email = '$email' AND  password = '$password' ";
+
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql); 
+
+    if ($resultado->rowCount() > 0){
+      $usuario = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($usuario);
+    }else {
+      echo json_encode("Error de email y/o contraseña");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+
+$app->get('/api/perfil/{id}', function(Request $request, Response $response){
+  // ok postman
+  $id = $request->getAttribute('id');
+  $sql = "SELECT nombre, apellido, fNac, email, fotoPerfil, celular, tipoPerfil, descripcion, trayectoria FROM usuarios WHERE idUsuario = $id";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql); 
+
+    if ($resultado->rowCount() > 0){
+      $usuario = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($usuario);
+    }else {
+      echo json_encode("No existen usuarios en la BBDD con este ID.");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+
+$app->put('/api/editarPerfil/{id}', function(Request $request, Response $response){
+
+  $id = $request->getAttribute('id');
+
+  $nombre = $request->getParam('nombre');
+  $apellido = $request->getParam('apellido');
+  $fNac = $request->getParam('fNac');
+  $email = $request->getParam('email');
+  $password = $request->getParam('password');
+  $fotoPerfil = $request->getParam('fotoPerfil'); 
+  $celular = $request->getParam('celular');
+  $tipoPerfil = $request->getParam('tipoPerfil');
+  $descripcion = $request->getParam('descripcion');
+  $trayectoria = $request->getParam('trayectoria');
+  $idCiudad = $request->getParam('idCiudad');     
+  
+  $sql = "UPDATE usuarios SET
+          nombre = :nombre,
+          apellido = :apellido,
+          fNac = :fNac,
+          email = :email,
+          password = :password,
+          fotoPerfil = :fotoPerfil,
+          celular = :celular,
+          tipoPerfil = :tipoPerfil,
+          descripcion = :descripcion,
+          trayectoria = :trayectoria,
+          idCiudad = :idCiudad
+        WHERE idUsuario = $id";
+     
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+
+    $resultado->bindParam(':nombre', $nombre);
+    $resultado->bindParam(':apellido', $apellido);
+    $resultado->bindParam(':fNac', $fNac);
+    $resultado->bindParam(':email', $email);
+    $resultado->bindParam(':password', $password);
+    $resultado->bindParam(':fotoPerfil', $fotoPerfil);
+    $resultado->bindParam(':celular', $celular);
+    $resultado->bindParam(':tipoPerfil', $tipoPerfil);
+    $resultado->bindParam(':descripcion', $descripcion);
+    $resultado->bindParam(':trayectoria', $trayectoria);
+    $resultado->bindParam(':idCiudad', $idCiudad);
+
+    $resultado->execute();
+    echo json_encode("Usuario modificado.");  
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
 
