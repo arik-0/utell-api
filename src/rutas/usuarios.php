@@ -4,6 +4,23 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 $app = new \Slim\App;
 
+
+
+/*
+
+Método HTTP	Descripción
+POST	Crea un recurso nuevo.
+GET	Recupera un recurso.
+PUT	Actualiza un recurso existente.
+DELETE	Suprime un recurso.
+
+
+*/
+
+
+
+
+
 // GET Todos los clientes 
 $app->get('/api/usuarios', function(Request $request, Response $response){
   $sql = "SELECT * FROM usuarios";
@@ -207,18 +224,19 @@ $app->get('/api/mensajedirecto', function(Request $request, Response $response){
 
 // GET Recueperar cliente por ID 
 $app->get('/api/usuarios/{id}', function(Request $request, Response $response){
-  $id_usuario = $request->getAttribute('idUsuario');
-  $sql = "SELECT * FROM usuarios WHERE idUsuario = $id_usuario";
+  // ok postman
+  $id = $request->getAttribute('id');
+  $sql = "SELECT * FROM usuarios WHERE idUsuario = $id";
   try{
     $db = new db();
     $db = $db->conectDB();
-    $resultado = $db->query($sql);
+    $resultado = $db->query($sql); 
 
     if ($resultado->rowCount() > 0){
       $usuario = $resultado->fetchAll(PDO::FETCH_OBJ);
       echo json_encode($usuario);
     }else {
-      echo json_encode("No existen cliente en la BBDD con este ID.");
+      echo json_encode("No existen usuario en la BBDD con este ID.");
     }
     $resultado = null;
     $db = null;
@@ -230,27 +248,37 @@ $app->get('/api/usuarios/{id}', function(Request $request, Response $response){
 
 // POST Crear nuevo cliente 
 $app->post('/api/usuarios/nuevo', function(Request $request, Response $response){
+  // ok con postman
    $nombre = $request->getParam('nombre');
-   $apellidos = $request->getParam('apellido');
-   $telefono = $request->getParam('fNac');
+   $apellido = $request->getParam('apellido');
+   $fNac = $request->getParam('fNac');
    $email = $request->getParam('email');
-   $direccion = $request->getParam('password');
-   $ciudad = $request->getParam('ciudad'); 
+   $password = $request->getParam('password');
+   $fotoPerfil = $request->getParam('fotoPerfil'); 
+   $celular = $request->getParam('celular');
+   $tipoPerfil = $request->getParam('tipoPerfil');
+   $descripcion = $request->getParam('descripcion');
+   $trayectoria = $request->getParam('trayectoria');
+   $idCiudad = $request->getParam('idCiudad');     
   
-  $sql = "INSERT INTO clientes (nombre, apellidos, telefono, email, direccion, ciudad) VALUES 
-          (:nombre, :apellidos, :telefono, :email, :direccion, :ciudad)";
+  $sql = "INSERT INTO usuarios (nombre, apellido, fNac, email, password, fotoPerfil, celular, tipoPerfil, descripcion, trayectoria, idCiudad) VALUES 
+          (:nombre, :apellido, :fNac, :email, :password, :fotoPerfil, :celular, :tipoPerfil, :descripcion, :trayectoria, :idCiudad)";
   try{
     $db = new db();
     $db = $db->conectDB();
     $resultado = $db->prepare($sql);
 
     $resultado->bindParam(':nombre', $nombre);
-    $resultado->bindParam(':apellidos', $apellidos);
-    $resultado->bindParam(':telefono', $telefono);
+    $resultado->bindParam(':apellido', $apellido);
+    $resultado->bindParam(':fNac', $fNac);
     $resultado->bindParam(':email', $email);
-    $resultado->bindParam(':direccion', $direccion);
-    $resultado->bindParam(':ciudad', $ciudad);
-
+    $resultado->bindParam(':password', $password);
+    $resultado->bindParam(':fotoPerfil', $fotoPerfil);
+    $resultado->bindParam(':celular', $celular);
+    $resultado->bindParam(':tipoPerfil', $tipoPerfil);
+    $resultado->bindParam(':descripcion', $descripcion);
+    $resultado->bindParam(':trayectoria', $trayectoria);
+    $resultado->bindParam(':idCiudad', $idCiudad);
     $resultado->execute();
     echo json_encode("Nuevo usuario guardado.");  
 
@@ -264,23 +292,35 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
 
 
 // PUT Modificar cliente 
-$app->put('/api/clientes/modificar/{id}', function(Request $request, Response $response){
-   $id_cliente = $request->getAttribute('id');
-   $nombre = $request->getParam('nombre');
-   $apellidos = $request->getParam('apellidos');
-   $telefono = $request->getParam('telefono');
-   $email = $request->getParam('email');
-   $direccion = $request->getParam('direccion');
-   $ciudad = $request->getParam('ciudad'); 
+$app->put('/api/usuarios/modificar/{id}', function(Request $request, Response $response){
+
+  $id = $request->getAttribute('id');
+
+  $nombre = $request->getParam('nombre');
+  $apellido = $request->getParam('apellido');
+  $fNac = $request->getParam('fNac');
+  $email = $request->getParam('email');
+  $password = $request->getParam('password');
+  $fotoPerfil = $request->getParam('fotoPerfil'); 
+  $celular = $request->getParam('celular');
+  $tipoPerfil = $request->getParam('tipoPerfil');
+  $descripcion = $request->getParam('descripcion');
+  $trayectoria = $request->getParam('trayectoria');
+  $idCiudad = $request->getParam('idCiudad');     
   
-  $sql = "UPDATE clientes SET
+  $sql = "UPDATE usuarios SET
           nombre = :nombre,
-          apellidos = :apellidos,
-          telefono = :telefono,
+          apellido = :apellido,
+          fNac = :fNac,
           email = :email,
-          direccion = :direccion,
-          ciudad = :ciudad
-        WHERE id = $id_cliente";
+          password = :password,
+          fotoPerfil = :fotoPerfil,
+          celular = :celular,
+          tipoPerfil = :tipoPerfil,
+          descripcion = :descripcion,
+          trayectoria = :trayectoria,
+          idCiudad = :idCiudad
+        WHERE idUsuario = $id";
      
   try{
     $db = new db();
@@ -288,14 +328,19 @@ $app->put('/api/clientes/modificar/{id}', function(Request $request, Response $r
     $resultado = $db->prepare($sql);
 
     $resultado->bindParam(':nombre', $nombre);
-    $resultado->bindParam(':apellidos', $apellidos);
-    $resultado->bindParam(':telefono', $telefono);
+    $resultado->bindParam(':apellido', $apellido);
+    $resultado->bindParam(':fNac', $fNac);
     $resultado->bindParam(':email', $email);
-    $resultado->bindParam(':direccion', $direccion);
-    $resultado->bindParam(':ciudad', $ciudad);
+    $resultado->bindParam(':password', $password);
+    $resultado->bindParam(':fotoPerfil', $fotoPerfil);
+    $resultado->bindParam(':celular', $celular);
+    $resultado->bindParam(':tipoPerfil', $tipoPerfil);
+    $resultado->bindParam(':descripcion', $descripcion);
+    $resultado->bindParam(':trayectoria', $trayectoria);
+    $resultado->bindParam(':idCiudad', $idCiudad);
 
     $resultado->execute();
-    echo json_encode("Cliente modificado.");  
+    echo json_encode("Usuario modificado.");  
 
     $resultado = null;
     $db = null;
@@ -307,8 +352,8 @@ $app->put('/api/clientes/modificar/{id}', function(Request $request, Response $r
 
 // DELETE borar cliente 
 $app->delete('/api/usuarios/delete/{id}', function(Request $request, Response $response){
-   $id_cliente = $request->getAttribute('id');
-   $sql = "DELETE FROM clientes WHERE id = $id_cliente";
+   $id_Usuario = $request->getAttribute('id');
+   $sql = "DELETE FROM usuarios WHERE idUsuario = $id_Usuario";
      
   try{
     $db = new db();
@@ -317,7 +362,7 @@ $app->delete('/api/usuarios/delete/{id}', function(Request $request, Response $r
      $resultado->execute();
 
     if ($resultado->rowCount() > 0) {
-      echo json_encode("Cliente eliminado.");  
+      echo json_encode("Usuario eliminado.");  
     }else {
       echo json_encode("No existe usuario con este ID.");
     }
