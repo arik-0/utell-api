@@ -231,10 +231,10 @@ $app->get('/api/usuarios/{id}', function(Request $request, Response $response){
 // POST Crear nuevo cliente 
 $app->post('/api/usuarios/nuevo', function(Request $request, Response $response){
    $nombre = $request->getParam('nombre');
-   $apellidos = $request->getParam('apellidos');
-   $telefono = $request->getParam('telefono');
+   $apellidos = $request->getParam('apellido');
+   $telefono = $request->getParam('fNac');
    $email = $request->getParam('email');
-   $direccion = $request->getParam('direccion');
+   $direccion = $request->getParam('password');
    $ciudad = $request->getParam('ciudad'); 
   
   $sql = "INSERT INTO clientes (nombre, apellidos, telefono, email, direccion, ciudad) VALUES 
@@ -252,7 +252,7 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
     $resultado->bindParam(':ciudad', $ciudad);
 
     $resultado->execute();
-    echo json_encode("Nuevo cliente guardado.");  
+    echo json_encode("Nuevo usuario guardado.");  
 
     $resultado = null;
     $db = null;
@@ -306,7 +306,7 @@ $app->put('/api/clientes/modificar/{id}', function(Request $request, Response $r
 
 
 // DELETE borar cliente 
-$app->delete('/api/clientes/delete/{id}', function(Request $request, Response $response){
+$app->delete('/api/usuarios/delete/{id}', function(Request $request, Response $response){
    $id_cliente = $request->getAttribute('id');
    $sql = "DELETE FROM clientes WHERE id = $id_cliente";
      
