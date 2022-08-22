@@ -479,3 +479,39 @@ $app->put('/api/editarPerfil/{id}', function(Request $request, Response $respons
   }
 }); 
 
+$app->post('/api/publicacion/nuevo', function(Request $request, Response $response){
+  // ok con postman
+   $idUsuario = $request->getParam('idUsuario');
+   $fecha = $request->getParam('fecha');
+   $hora = $request->getParam('hora');
+   $idUniversidad = $request->getParam('idUniversidad');
+   $idSede = $request->getParam('idSede');
+   $idCarrera = $request->getParam('idCarrera');
+   $tecto = $request->getParam('texto');
+   $likes = $request->getParam('likes');
+
+  
+  $sql = "INSERT INTO publicaciones (idUsuario, fecha, hora, idUniversidad, idSede, idCarrera, texto, likes) VALUES 
+          (:idUsuario, :fecha, :hora, :idUniversidad, :idSede, :idCarrera, :texto, :likes)";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':fecha', $fecha);
+    $resultado->bindParam(':hora', $hora);
+    $resultado->bindParam(':idUniversidad', $idUniversidad);
+    $resultado->bindParam(':idSede', $idSede);
+    $resultado->bindParam(':idCarrera', $idCarrera);
+    $resultado->bindParam(':texto', $texto);
+    $resultado->bindParam(':likes', $likes);
+    
+    echo json_encode("Nuevo usuario guardado.");  
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
