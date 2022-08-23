@@ -18,7 +18,9 @@ DELETE	Suprime un recurso.
 */
 
 
-
+$app->get('/api/', function(Request $request, Response $response){
+    echo("Bienvenido a la API");
+}); 
 
 
 // GET Todos los clientes 
@@ -349,6 +351,54 @@ $app->put('/api/usuarios/modificar/{id}', function(Request $request, Response $r
   }
 }); 
 
+//modificar contra xd 
+// Hola arik del futuro
+$app->put('/api/usuarios/modificarPass', function(Request $request, Response $response){
+
+  $email = $request->getAttribute('email');
+  $oldPassword = $request->getAttribute('oldPassword');
+  $password = $request->getParam('password');
+    
+  
+  $sql = "SELECT id from usuarios WHERE
+
+          email = '$email' AND password='$oldPassword'
+
+        ";
+
+
+
+     
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+
+
+    $resultado = $db->query($sql);
+
+    if ($resultado->rowCount() > 0){
+        $sql = "UPDATE usuarios SET
+        password = :password,
+      WHERE email = $email";
+    }
+
+
+
+    $resultado = $db->prepare($sql);
+
+ 
+    $resultado->bindParam(':password', $password);
+
+
+    $resultado->execute();
+    echo json_encode("Contraseña modificada.");  
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
 
 // DELETE borar cliente 
 $app->delete('/api/usuarios/delete/{id}', function(Request $request, Response $response){
