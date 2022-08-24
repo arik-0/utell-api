@@ -353,6 +353,8 @@ $app->put('/api/usuarios/modificar/{id}', function(Request $request, Response $r
 
 //modificar contra xd 
 // Hola arik del futuro
+// no pienses en ella crack 
+//todo va a estar bien
 $app->put('/api/usuarios/modificarPass', function(Request $request, Response $response){
 
   $email = $request->getAttribute('email');
@@ -559,6 +561,87 @@ $app->post('/api/publicacion/nuevo', function(Request $request, Response $respon
     
     echo json_encode("Nuevo usuario guardado.");  
 
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+
+$app->post('/api/newPost', function(Request $request, Response $response){
+  // ok postman
+  $idUsuario = $request->getParam('idUsuario');
+  $fecha = $request->getParam('fecha');
+  $hora = $request->getParam('hora');
+  $idUniversidad = $request->getParam('idUniversidad');
+  $idSede = $request->getParam('idSede');
+  $idCarrera = $request->getParam('idCarrera');
+  $texto = $request->getParam('texto');
+  $likes = $request->getParam('likes');
+
+  $sql = "INSERT INTO publicaciones (idUsuario, fecha, hora, idUniversidad, idSede, idCarrera, texto, likes) VALUES 
+  (:idUsuario, :fecha, :hora, :idUniversidad, :idSede, :idCarrera, :texto, :likes)";
+
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql); 
+
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':fecha', $fecha);
+    $resultado->bindParam(':hora', $hora);
+    $resultado->bindParam(':idUniversidad', $idUniversidad);
+    $resultado->bindParam(':idSede', $idSede);
+    $resultado->bindParam(':idCarrera', $idCarrera);
+    $resultado->bindParam(':texto', $texto);
+    $resultado->bindParam(':likes', $likes);
+
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+
+$app->post('/api/nuevaUniversidad', function(Request $request, Response $response){
+  // ok postman
+  $email = $request->getParam('email');
+  $password = $request->getParam('password');
+  $nombre = $request->getParam('nombre');
+   $apellido = $request->getParam('apellido');
+   $fNac = $request->getParam('fNac');
+   $email = $request->getParam('email');
+   $password = $request->getParam('password');
+   $fotoPerfil = $request->getParam('fotoPerfil'); 
+   $celular = $request->getParam('celular');
+   $tipoPerfil = 'UNIVERSIDAD';
+   $descripcion = $request->getParam('descripcion');
+   $trayectoria = $request->getParam('trayectoria');
+   $idCiudad = $request->getParam('idCiudad');     
+  $sql = "SELECT nombre, apellido FROM usuarios WHERE email = '$email' AND  password = '$password' AND tipoPerfil='ADMIN'";
+
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql); 
+    if ($resultado->rowCount() > 0){
+      $sql = "INSERT INTO usuarios (nombre, apellido, fNac, email, password, fotoPerfil, celular, tipoPerfil, descripcion, trayectoria, idCiudad) VALUES 
+          (:nombre, :apellido, :fNac, :email, :password, :fotoPerfil, :celular, :tipoPerfil, :descripcion, :trayectoria, :idCiudad)";
+
+           $resultado->bindParam(':nombre', $nombre);
+           $resultado->bindParam(':apellido', $apellido);
+           $resultado->bindParam(':fNac', $fNac);
+           $resultado->bindParam(':email', $email);
+           $resultado->bindParam(':password', $password);
+           $resultado->bindParam(':fotoPerfil', $fotoPerfil);
+           $resultado->bindParam(':celular', $celular);
+           $resultado->bindParam(':tipoPerfil', $tipoPerfil);
+           $resultado->bindParam(':descripcion', $descripcion);
+           $resultado->bindParam(':trayectoria', $trayectoria);
+           $resultado->bindParam(':idCiudad', $idCiudad);
+    }else {
+      echo json_encode("Error de email y/o contraseña");
+    }
     $resultado = null;
     $db = null;
   }catch(PDOException $e){
