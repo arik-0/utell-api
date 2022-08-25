@@ -417,6 +417,7 @@ $app->delete('/api/usuarios/delete/{id}', function(Request $request, Response $r
       echo json_encode("Usuario eliminado.");  
     }else {
       echo json_encode("No existe usuario con este ID.");
+    //LOL
     }
 
     $resultado = null;
@@ -431,7 +432,7 @@ $app->post('/api/login', function(Request $request, Response $response){
   $email = $request->getParam('email');
   $password = $request->getParam('password');
 
-  $sql = "SELECT nombre, apellido FROM usuarios WHERE email = '$email' AND  password = '$password' ";
+  $sql = "SELECT nombre, apellido, idUsuario, fNac, fotoPerfil, celular, tipoPerfil, descripcion, trayectoria, idCiudad FROM usuarios WHERE email = '$email' AND  password = '$password' ";
 
 
   try{
@@ -579,14 +580,15 @@ $app->post('/api/newPost', function(Request $request, Response $response){
   $texto = $request->getParam('texto');
   $likes = $request->getParam('likes');
 
-  $sql = "INSERT INTO publicaciones (idUsuario, fecha, hora, idUniversidad, idSede, idCarrera, texto, likes) VALUES 
-  (:idUsuario, :fecha, :hora, :idUniversidad, :idSede, :idCarrera, :texto, :likes)";
+  $sql = "INSERT INTO publicaciones (idUsuario, fecha, hora, idUniversidad, idSede, idCarrera, texto) VALUES 
+  (:idUsuario, :fecha, :hora, :idUniversidad, :idSede, :idCarrera, :texto)";
 
 
   try{
     $db = new db();
     $db = $db->conectDB();
     $resultado = $db->query($sql); 
+    $resultado = $db->prepare($sql);
 
     $resultado->bindParam(':idUsuario', $idUsuario);
     $resultado->bindParam(':fecha', $fecha);
@@ -596,7 +598,9 @@ $app->post('/api/newPost', function(Request $request, Response $response){
     $resultado->bindParam(':idCarrera', $idCarrera);
     $resultado->bindParam(':texto', $texto);
     $resultado->bindParam(':likes', $likes);
-
+    $resultado->execute();
+    $resultado = null;
+    $db = null;
   }catch(PDOException $e){
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
@@ -609,8 +613,8 @@ $app->post('/api/nuevaUniversidad', function(Request $request, Response $respons
   $nombre = $request->getParam('nombre');
    $apellido = $request->getParam('apellido');
    $fNac = $request->getParam('fNac');
-   $email = $request->getParam('email');
-   $password = $request->getParam('password');
+   $emailUni = $request->getParam('emailUni');
+   $passwordUni = $request->getParam('passwordUni');
    $fotoPerfil = $request->getParam('fotoPerfil'); 
    $celular = $request->getParam('celular');
    $tipoPerfil = 'UNIVERSIDAD';
@@ -624,21 +628,58 @@ $app->post('/api/nuevaUniversidad', function(Request $request, Response $respons
     $db = new db();
     $db = $db->conectDB();
     $resultado = $db->query($sql); 
+
+
     if ($resultado->rowCount() > 0){
-      $sql = "INSERT INTO usuarios (nombre, apellido, fNac, email, password, fotoPerfil, celular, tipoPerfil, descripcion, trayectoria, idCiudad) VALUES 
-          (:nombre, :apellido, :fNac, :email, :password, :fotoPerfil, :celular, :tipoPerfil, :descripcion, :trayectoria, :idCiudad)";
+      $sql = "INSERT INTO usuarios (nombre, apellido, fNac, email, password, fotoPerfil, celular, 
+              tipoPerfil, descripcion, trayectoria, idCiudad) 
+              VALUES 
+          (:nombre, :apellido, :fNac, :emailUni, :passwordUni, :fotoPerfil, :celular, 
+          :tipoPerfil, :descripcion, :trayectoria, :idCiudad)";
+          $resultado = $db->prepare($sql);
 
            $resultado->bindParam(':nombre', $nombre);
            $resultado->bindParam(':apellido', $apellido);
            $resultado->bindParam(':fNac', $fNac);
-           $resultado->bindParam(':email', $email);
-           $resultado->bindParam(':password', $password);
+           $resultado->bindParam(':emailUni', $emailUni);
+           $resultado->bindParam(':passwordUni', $passwordUni);
            $resultado->bindParam(':fotoPerfil', $fotoPerfil);
            $resultado->bindParam(':celular', $celular);
            $resultado->bindParam(':tipoPerfil', $tipoPerfil);
            $resultado->bindParam(':descripcion', $descripcion);
            $resultado->bindParam(':trayectoria', $trayectoria);
            $resultado->bindParam(':idCiudad', $idCiudad);
+           $resultado->execute();
+    
+           
+           echo("Universidad creada");
+           $resultado = null;
+          $db = null;
+    }else {
+      echo json_encode("Error de email y/o contraseña");
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+$app->post('/api/likePost', function(Request $request, Response $response){
+  // ok postman
+  $idPublicacion = $request->getParam('idPublicacion');
+  $idUsuario = $request->getParam('idUsuario');
+
+  $sql = "UPDATE likes FROM publicaciones WHERE idPublicacion=";
+
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql); 
+
+    if ($resultado->rowCount() > 0){
+      $usuario = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($usuario);
     }else {
       echo json_encode("Error de email y/o contraseña");
     }
