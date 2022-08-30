@@ -572,37 +572,33 @@ $app->post('/api/publicacion/nuevo', function(Request $request, Response $respon
 $app->post('/api/newPost', function(Request $request, Response $response){
   // ok postman
   $idUsuario = $request->getParam('idUsuario');
-  $fecha = $request->getParam('fecha');
-  $hora = $request->getParam('hora');
+  //$fecha = $request->getParam('fecha');
+  //$hora = $request->getParam('hora');
   $idUniversidad = $request->getParam('idUniversidad');
   $idSede = $request->getParam('idSede');
   $idCarrera = $request->getParam('idCarrera');
   $texto = $request->getParam('texto');
-  $likes = $request->getParam('likes');
+  //$likes = $request->getParam('likes');
 
-  $sql = "INSERT INTO publicaciones (idUsuario, fecha, hora, idUniversidad, idSede, idCarrera, texto) VALUES 
-  (:idUsuario, :fecha, :hora, :idUniversidad, :idSede, :idCarrera, :texto)";
+  $sql = "INSERT INTO publicaciones (idUsuario, fecha, hora, idUniversidad, idSede, idCarrera, texto, likes) VALUES 
+  (:idUsuario, CURRENT_DATE, CURRENT_TIME, :idUniversidad, :idSede, :idCarrera, :texto, 0)";
 
 
   try{
     $db = new db();
     $db = $db->conectDB();
-    $resultado = $db->query($sql); 
     $resultado = $db->prepare($sql);
 
     $resultado->bindParam(':idUsuario', $idUsuario);
-    $resultado->bindParam(':fecha', $fecha);
-    $resultado->bindParam(':hora', $hora);
     $resultado->bindParam(':idUniversidad', $idUniversidad);
     $resultado->bindParam(':idSede', $idSede);
     $resultado->bindParam(':idCarrera', $idCarrera);
     $resultado->bindParam(':texto', $texto);
-    $resultado->bindParam(':likes', $likes);
     $resultado->execute();
     $resultado = null;
     $db = null;
   }catch(PDOException $e){
-    echo '{"error" : {"text":'.$e->getMessage().'}';
+    echo '{"error" : {"text":'.$e->getMessage()." - ".$sql.'}';
   }
 }); 
 
@@ -668,20 +664,48 @@ $app->post('/api/likePost', function(Request $request, Response $response){
   // ok postman
   $idPublicacion = $request->getParam('idPublicacion');
   $idUsuario = $request->getParam('idUsuario');
-
-  $sql = "UPDATE likes FROM publicaciones WHERE idPublicacion=";
-
-
+  
+  $sql = "INSERT INTO likes (idUsuario, idPublicacion, fechaHora) VALUES (:idUsuario, :idPublicacion, now() ) ";
+  
   try{
     $db = new db();
     $db = $db->conectDB();
-    $resultado = $db->query($sql); 
+    $resultado = $db->prepare($sql);
+// si se hizo el insert, usar 
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':idPublicacion', $idPublicacion);
+    //$resultado->bindParam(':fechaHora', $fechaHora);
 
+    if ($resultado->execute()) {
+      $sql = "UPDATE publicaciones SET likes = likes+1  WHERE idPublicacion=$idPublicacion";
+      $resultado = $db->prepare($sql);
+      $resultado->execute();
+    }
+
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+$app->get('/api/parati', function(Request $request, Response $response){
+  $idCiudad = $request->getParam('idCiudad');
+  $idUsuario = $request->getParam('idUsuario');
+  $inicio = $request->getParam('inicio');
+  $cantidad = $request->getParam('cantidad');
+  $sql = "SELECT * FROM publicaciones WHERE idCiudad = :idCiudad ORDER BY fecha DESC, hora DESC LIMIT $inicio, $cantidad";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':idCiudad', $idCiudad);
     if ($resultado->rowCount() > 0){
-      $usuario = $resultado->fetchAll(PDO::FETCH_OBJ);
-      echo json_encode($usuario);
+      $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($carreras);
     }else {
-      echo json_encode("Error de email y/o contraseña");
+      echo json_encode("No existen carreras en la BBDD.");
     }
     $resultado = null;
     $db = null;
