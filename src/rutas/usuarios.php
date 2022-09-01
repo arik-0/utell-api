@@ -690,22 +690,24 @@ $app->post('/api/likePost', function(Request $request, Response $response){
   }
 });
 $app->get('/api/parati', function(Request $request, Response $response){
+  // ok potzman
   $idCiudad = $request->getParam('idCiudad');
   $idUsuario = $request->getParam('idUsuario');
   $inicio = $request->getParam('inicio');
   $cantidad = $request->getParam('cantidad');
-  $sql = "SELECT * FROM publicaciones WHERE idCiudad = :idCiudad ORDER BY fecha DESC, hora DESC LIMIT $inicio, $cantidad";
+  $sql = "SELECT * FROM publicaciones WHERE idCiudad = $idCiudad ORDER BY fecha DESC, hora DESC LIMIT $inicio, $cantidad";
   try{
     $db = new db();
     $db = $db->conectDB();
     $resultado = $db->query($sql);
     $resultado->bindParam(':idUsuario', $idUsuario);
     $resultado->bindParam(':idCiudad', $idCiudad);
+    $resultado->bindParam(':inicio', $inicio);
+    $resultado->bindParam(':cantidad', $cantidad);
     if ($resultado->rowCount() > 0){
       $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
       echo json_encode($carreras);
     }else {
-      echo json_encode("No existen carreras en la BBDD.");
     }
     $resultado = null;
     $db = null;
@@ -713,3 +715,58 @@ $app->get('/api/parati', function(Request $request, Response $response){
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 }); 
+$app->post('/api/solicitudAmistad', function(Request $request, Response $response){
+  //semi-ok postman
+  $idAmigo = $request->getParam('idAmigo');
+  $idUsuario = $request->getParam('idUsuario');
+  //$status = "P"; //P de pendiente; A de activo; R de rechazado
+  
+  $sql = "INSERT INTO amigos (idUsuario , idAmigo, status) VALUES (:idUsuario , :idAmigo , 'P') ";
+  
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+    $resultado->bindParam(':idAmigo', $idAmigo);
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    //$resultado->bindParam(':status', $status);
+/*
+    if ($resultado->execute()) {
+      $resultado = $db->prepare($sql);
+      
+    }*/
+    $resultado->execute();
+    echo("Solicitud enviada");
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+$app->put('/api/modAmistad', function(Request $request, Response $response){
+  //semi-ok postman
+  $idAmigo = $request->getParam('idAmigo');
+  $idUsuario = $request->getParam('idUsuario');
+  $status = $request->getParam('status'); //P de pendiente; A de activo; R de rechazado
+  
+  $sql = "UPDATE amigos SET status = :status WHERE idUsuario=:idUsuario AND idAmigo=:idAmigo";
+  //UPDATE publicaciones SET likes = likes+1  WHERE idPublicacion=$idPublicacion";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+    $resultado->bindParam(':idAmigo', $idAmigo);
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':status', $status);
+      //$resultado = $db->prepare($sql);
+      $resultado->execute();
+      echo("Solicitud enviada");
+
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
