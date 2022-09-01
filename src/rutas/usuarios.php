@@ -540,7 +540,7 @@ $app->post('/api/publicacion/nuevo', function(Request $request, Response $respon
    $idUniversidad = $request->getParam('idUniversidad');
    $idSede = $request->getParam('idSede');
    $idCarrera = $request->getParam('idCarrera');
-   $tecto = $request->getParam('texto');
+   $texto = $request->getParam('texto');
    $likes = $request->getParam('likes');
 
   
@@ -745,13 +745,13 @@ $app->post('/api/solicitudAmistad', function(Request $request, Response $respons
   }
 });
 $app->put('/api/modAmistad', function(Request $request, Response $response){
-  //semi-ok postman
+  //semi-ok postman 
   $idAmigo = $request->getParam('idAmigo');
   $idUsuario = $request->getParam('idUsuario');
   $status = $request->getParam('status'); //P de pendiente; A de activo; R de rechazado
   
-  $sql = "UPDATE amigos SET status = :status WHERE idUsuario=:idUsuario AND idAmigo=:idAmigo";
-  //UPDATE publicaciones SET likes = likes+1  WHERE idPublicacion=$idPublicacion";
+  $sql = "UPDATE amigos SET status = $status WHERE idUsuario=:idUsuario AND idAmigo=:idAmigo";
+
   try{
     $db = new db();
     $db = $db->conectDB();
@@ -761,7 +761,6 @@ $app->put('/api/modAmistad', function(Request $request, Response $response){
     $resultado->bindParam(':status', $status);
       //$resultado = $db->prepare($sql);
       $resultado->execute();
-      echo("Solicitud enviada");
 
 
     $resultado = null;
@@ -770,3 +769,31 @@ $app->put('/api/modAmistad', function(Request $request, Response $response){
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 });
+$app->post('/api/reporte/nuevo', function(Request $request, Response $response){
+  // not ok postman
+   $idPublicacion = $request->getParam('idPublicacion');
+   $idUsuario = $request->getParam('idUsuario');
+   $texto = $request->getParam('texto');
+   $tipo = $request->getParam('tipo');
+
+  
+  $sql = "INSERT INTO publicaciones (idPublicacion, idUsuario, tipo, texto,  fechaHora) VALUES 
+          (:idPublicacion, :idUsuario, $tipo, :texto,  now())";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':idPublicacion', $idPublicacion);
+    $resultado->bindParam(':texto', $texto);
+    $resultado->bindParam(':tipo', $tipo);
+    $resultado->execute();    
+    echo json_encode("Guiso");  
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
