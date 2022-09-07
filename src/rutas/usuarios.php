@@ -777,8 +777,8 @@ $app->post('/api/reporte/nuevo', function(Request $request, Response $response){
    $tipo = $request->getParam('tipo');
 
   
-  $sql = "INSERT INTO publicaciones (idPublicacion, idUsuario, tipo, texto,  fechaHora) VALUES 
-          (:idPublicacion, :idUsuario, $tipo, :texto,  now())";
+  $sql = "INSERT INTO reportes (idPublicacion, idUsuario, tipo, texto,  fechaHora) VALUES 
+          (:idPublicacion, :idUsuario, :tipo, :texto,  now())";
   try{
     $db = new db();
     $db = $db->conectDB();
