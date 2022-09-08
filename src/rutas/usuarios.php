@@ -770,7 +770,7 @@ $app->put('/api/modAmistad', function(Request $request, Response $response){
   }
 });
 $app->post('/api/reporte/nuevo', function(Request $request, Response $response){
-  // not ok postman
+  // ok postman
    $idPublicacion = $request->getParam('idPublicacion');
    $idUsuario = $request->getParam('idUsuario');
    $texto = $request->getParam('texto');
@@ -788,6 +788,33 @@ $app->post('/api/reporte/nuevo', function(Request $request, Response $response){
     $resultado->bindParam(':idPublicacion', $idPublicacion);
     $resultado->bindParam(':texto', $texto);
     $resultado->bindParam(':tipo', $tipo);
+    $resultado->execute();    
+    echo json_encode("Guiso");  
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+$app->post('/api/comentario/nuevo', function(Request $request, Response $response){
+  // not ok postman
+   $idPublicacion = $request->getParam('idPublicacion');
+   $texto = $request->getParam('texto');
+   $tipo = $request->getParam('tipo');
+   $tipo = $request->getParam('fechaHora'); 
+  
+  $sql = "INSERT INTO comentarios (idPublicacion, titulo, texto,  fechahora) VALUES 
+          (:idPublicacion, :titulo, :texto,  now())";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+
+    $resultado->bindParam(':idPublicacion', $idPublicacion);
+    $resultado->bindParam(':titulo', $titulo);
+    $resultado->bindParam(':texto', $texto);
+    $resultado->bindParam(':fechahora', $fechahora);
     $resultado->execute();    
     echo json_encode("Guiso");  
 
