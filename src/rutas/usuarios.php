@@ -798,14 +798,14 @@ $app->post('/api/reporte/nuevo', function(Request $request, Response $response){
   }
 }); 
 $app->post('/api/comentario/nuevo', function(Request $request, Response $response){
-  // not ok postman
+  //  ok postman
    $idPublicacion = $request->getParam('idPublicacion');
    $texto = $request->getParam('texto');
    $tipo = $request->getParam('tipo');
-   $tipo = $request->getParam('fechaHora'); 
-  
-  $sql = "INSERT INTO comentarios (idPublicacion, titulo, texto,  fechahora) VALUES 
-          (:idPublicacion, :titulo, :texto,  now())";
+   $fechahora = $request->getParam('fechaHora'); 
+   $idUsuario = $request->getParam('idUsuario');
+  $sql = "INSERT INTO comentarios (idPublicacion, titulo, texto,  fechahora, idUsuario) VALUES 
+          (:idPublicacion, :titulo, :texto,  now(), :idUsuario)";
   try{
     $db = new db();
     $db = $db->conectDB();
@@ -815,6 +815,7 @@ $app->post('/api/comentario/nuevo', function(Request $request, Response $respons
     $resultado->bindParam(':titulo', $titulo);
     $resultado->bindParam(':texto', $texto);
     $resultado->bindParam(':fechahora', $fechahora);
+    $resultado->bindParam(':idUsuario', $idUsuario);
     $resultado->execute();    
     echo json_encode("Guiso");  
 
