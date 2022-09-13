@@ -825,3 +825,59 @@ $app->post('/api/comentario/nuevo', function(Request $request, Response $respons
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 }); 
+
+$app->post('/api/mensaje/nuevo', function(Request $request, Response $response){
+  //  ?ok postman
+   $idRemitente = $request->getParam('idRemitente');
+   $idDestinatario = $request->getParam('idDestinatario');
+   $texto = $request->getParam('texto');
+  $sql = "INSERT INTO comentarios (idRemitente, idDestinatario, texto,  fechahora) VALUES 
+          (:idRemitente,idDestinatario, :texto,  now())";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+
+    $resultado->bindParam(':idRemitente', $idRemitente);
+    $resultado->bindParam(':idDestinatario', $idDestinatario);
+    $resultado->bindParam(':texto', $texto);
+    $resultado->bindParam(':fechahora', $fechahora);
+    $sql = "INSERT INTO notificaciones (idUsuario, titulo, texto, fhAlta) VALUES 
+          (:idDestinatario, Tienes una nueva notificación, :texto,  now())";
+    $resultado->execute();    
+
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+
+$app->get('/api/mensaje/recibir', function(Request $request, Response $response){
+  //  ?ok postman
+   $idReceptor = $request->getParam('idReceptor');
+   $idRemitente = $request->getParam('idRemitente');
+  $sql = "SELECT * FROM mensajedirecto WHERE idRemitente=$idRemitente AND idDestinatario=$idReceptor";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+    if ($resultado->rowCount() > 0){
+      $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($carreras);
+      $sql = "UPDATE notificaciones SET
+      fhLectura = now()
+    WHERE idUsuario = $idReceptor AND fhLectura is NULL";
+    }else {
+    }
+
+    $resultado->execute();    
+    
+
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
