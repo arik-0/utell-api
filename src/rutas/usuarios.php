@@ -532,42 +532,6 @@ $app->put('/api/editarPerfil/{id}', function(Request $request, Response $respons
   }
 }); 
 
-$app->post('/api/publicacion/nuevo', function(Request $request, Response $response){
-  // ok con postman
-   $idUsuario = $request->getParam('idUsuario');
-   $fecha = $request->getParam('fecha');
-   $hora = $request->getParam('hora');
-   $idUniversidad = $request->getParam('idUniversidad');
-   $idSede = $request->getParam('idSede');
-   $idCarrera = $request->getParam('idCarrera');
-   $texto = $request->getParam('texto');
-   $likes = $request->getParam('likes');
-
-  
-  $sql = "INSERT INTO publicaciones (idUsuario, fecha, hora, idUniversidad, idSede, idCarrera, texto, likes) VALUES 
-          (:idUsuario, :fecha, :hora, :idUniversidad, :idSede, :idCarrera, :texto, :likes)";
-  try{
-    $db = new db();
-    $db = $db->conectDB();
-    $resultado = $db->prepare($sql);
-
-    $resultado->bindParam(':idUsuario', $idUsuario);
-    $resultado->bindParam(':fecha', $fecha);
-    $resultado->bindParam(':hora', $hora);
-    $resultado->bindParam(':idUniversidad', $idUniversidad);
-    $resultado->bindParam(':idSede', $idSede);
-    $resultado->bindParam(':idCarrera', $idCarrera);
-    $resultado->bindParam(':texto', $texto);
-    $resultado->bindParam(':likes', $likes);
-    
-    echo json_encode("Nuevo usuario guardado.");  
-
-    $resultado = null;
-    $db = null;
-  }catch(PDOException $e){
-    echo '{"error" : {"text":'.$e->getMessage().'}';
-  }
-}); 
 
 $app->post('/api/newPost', function(Request $request, Response $response){
   // ok postman
@@ -745,12 +709,12 @@ $app->post('/api/solicitudAmistad', function(Request $request, Response $respons
   }
 });
 $app->put('/api/modAmistad', function(Request $request, Response $response){
-  //semi-ok postman 
+  // ok postman 
   $idAmigo = $request->getParam('idAmigo');
   $idUsuario = $request->getParam('idUsuario');
   $status = $request->getParam('status'); //P de pendiente; A de activo; R de rechazado
   
-  $sql = "UPDATE amigos SET status = $status WHERE idUsuario=:idUsuario AND idAmigo=:idAmigo";
+  $sql = "UPDATE amigos SET status = :status WHERE idUsuario=:idUsuario AND idAmigo=:idAmigo";
 
   try{
     $db = new db();
@@ -801,10 +765,9 @@ $app->post('/api/comentario/nuevo', function(Request $request, Response $respons
   //  ok postman
    $idPublicacion = $request->getParam('idPublicacion');
    $texto = $request->getParam('texto');
-   $tipo = $request->getParam('tipo');
-   $fechahora = $request->getParam('fechaHora'); 
+   $titulo = $request->getParam('titulo');
    $idUsuario = $request->getParam('idUsuario');
-  $sql = "INSERT INTO comentarios (idPublicacion, titulo, texto,  fechahora, idUsuario) VALUES 
+  $sql = "INSERT INTO comentarios (idPublicacion, title, texto,  fechahora, idUsuario) VALUES 
           (:idPublicacion, :titulo, :texto,  now(), :idUsuario)";
   try{
     $db = new db();
@@ -814,7 +777,6 @@ $app->post('/api/comentario/nuevo', function(Request $request, Response $respons
     $resultado->bindParam(':idPublicacion', $idPublicacion);
     $resultado->bindParam(':titulo', $titulo);
     $resultado->bindParam(':texto', $texto);
-    $resultado->bindParam(':fechahora', $fechahora);
     $resultado->bindParam(':idUsuario', $idUsuario);
     $resultado->execute();    
     echo json_encode("Guiso");  
@@ -827,12 +789,14 @@ $app->post('/api/comentario/nuevo', function(Request $request, Response $respons
 }); 
 
 $app->post('/api/mensaje/nuevo', function(Request $request, Response $response){
-  //  ?ok postman
+  //  ok postman
    $idRemitente = $request->getParam('idRemitente');
    $idDestinatario = $request->getParam('idDestinatario');
    $texto = $request->getParam('texto');
-  $sql = "INSERT INTO comentarios (idRemitente, idDestinatario, texto,  fechahora) VALUES 
-          (:idRemitente,idDestinatario, :texto,  now())";
+
+  $sql = "INSERT INTO mensajedirecto (idRemitente, idDestinatario, texto,  fhMensaje) VALUES 
+          (:idRemitente, :idDestinatario, :texto,  now())";
+
   try{
     $db = new db();
     $db = $db->conectDB();
@@ -841,11 +805,20 @@ $app->post('/api/mensaje/nuevo', function(Request $request, Response $response){
     $resultado->bindParam(':idRemitente', $idRemitente);
     $resultado->bindParam(':idDestinatario', $idDestinatario);
     $resultado->bindParam(':texto', $texto);
-    $resultado->bindParam(':fechahora', $fechahora);
-    $sql = "INSERT INTO notificaciones (idUsuario, titulo, texto, fhAlta) VALUES 
-          (:idDestinatario, Tienes una nueva notificación, :texto,  now())";
+    
     $resultado->execute();    
 
+
+    // notificacion
+
+    $sql = "INSERT INTO notificaciones (idUsuario, titulo, texto, fhAlta) VALUES 
+        (:idDestinatario, 'Tienes una nueva notificación', :texto,  now())";
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+    $resultado->bindParam(':idDestinatario', $idDestinatario);
+    $resultado->bindParam(':texto', $texto);
+    $resultado->execute();
 
     $resultado = null;
     $db = null;
@@ -855,24 +828,32 @@ $app->post('/api/mensaje/nuevo', function(Request $request, Response $response){
 }); 
 
 $app->get('/api/mensaje/recibir', function(Request $request, Response $response){
-  //  ?ok postman
+  //  ok postman
    $idReceptor = $request->getParam('idReceptor');
    $idRemitente = $request->getParam('idRemitente');
-  $sql = "SELECT * FROM mensajedirecto WHERE idRemitente=$idRemitente AND idDestinatario=$idReceptor";
+  $sql = "SELECT * FROM mensajedirecto WHERE idRemitente=:idRemitente AND idDestinatario=:idReceptor";
   try{
     $db = new db();
     $db = $db->conectDB();
     $resultado = $db->prepare($sql);
+    $resultado->bindParam(':idRemitente', $idRemitente);
+    $resultado->bindParam(':idReceptor', $idReceptor);
+    $resultado->execute();    
+    $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
     if ($resultado->rowCount() > 0){
-      $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
+      
       echo json_encode($carreras);
       $sql = "UPDATE notificaciones SET
       fhLectura = now()
-    WHERE idUsuario = $idReceptor AND fhLectura is NULL";
-    }else {
+    WHERE idUsuario = :idReceptor AND fhLectura is NULL";
+
+$resultado = $db->prepare($sql);
+$resultado->bindParam(':idReceptor', $idReceptor);
+$resultado->execute();    
+
+}else {
     }
 
-    $resultado->execute();    
     
 
     $resultado = null;
@@ -881,3 +862,50 @@ $app->get('/api/mensaje/recibir', function(Request $request, Response $response)
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 }); 
+$app->post('/api/favoritos/agregar', function(Request $request, Response $response){
+  // ok postman
+  $idUsuario = $request->getParam('idUsuario');
+  $idPublicacion = $request->getParam('idPublicacion');
+
+  $sql = "INSERT INTO favoritos (idUsuario, idPublicacion, fh, estado) VALUES 
+  (:idUsuario, :idPublicacion, now(), 'GUARDADO')";
+
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':idPublicacion', $idPublicacion);
+    
+    $resultado->execute();    
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+$app->delete('/api/favoritos/eliminar', function(Request $request, Response $response){
+  // ok postman
+  $idUsuario = $request->getParam('idUsuario');
+  $idPublicacion = $request->getParam('idPublicacion');
+
+  $sql = "DELETE FROM favoritos WHERE idUsuario=:idUsuario AND idPublicacion=:idPublicacion";
+
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':idPublicacion', $idPublicacion);
+    
+    $resultado->execute();    
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
