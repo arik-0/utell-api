@@ -653,7 +653,7 @@ $app->post('/api/likePost', function(Request $request, Response $response){
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 });
-$app->get('/api/parati', function(Request $request, Response $response){
+$app->get('/api/...', function(Request $request, Response $response){
   // ok potzman
   $idCiudad = $request->getParam('idCiudad');
   $idUsuario = $request->getParam('idUsuario');
@@ -893,7 +893,6 @@ $app->delete('/api/favoritos/eliminar', function(Request $request, Response $res
 
   $sql = "DELETE FROM favoritos WHERE idUsuario=:idUsuario AND idPublicacion=:idPublicacion";
 
-
   try{
     $db = new db();
     $db = $db->conectDB();
@@ -901,6 +900,83 @@ $app->delete('/api/favoritos/eliminar', function(Request $request, Response $res
 
     $resultado->bindParam(':idUsuario', $idUsuario);
     $resultado->bindParam(':idPublicacion', $idPublicacion);
+    
+    $resultado->execute();    
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+$app->get('/api/tuRed', function(Request $request, Response $response){
+  // ok potzman????
+  $idUsuario = $request->getParam('idUsuario');
+  $sql = "SELECT * FROM publicaciones WHERE idUsuario IN 
+  (SELECT idAmigo FROM amigos WHERE status='A' AND idUsuario=:idUsuario)";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    if ($resultado->rowCount() > 0){
+      $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($carreras);
+    }else {
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+$app->get('/api/parati', function(Request $request, Response $response){
+  // ok potzman?
+  $idUsuario = $request->getParam('idUsuario');
+
+  $sql = "SELECT * FROM publicaciones WHERE 
+  idUniversidad IN (SELECT idUniversidad FROM preferencias WHERE idUsuario=:idUsuario)
+  OR
+  idCarrera IN (SELECT idCarrera FROM preferencias WHERE idUsuario=:idUsuario)
+  OR
+  idCiudad IN (SELECT idCiudad FROM preferencias WHERE idUsuario=:idUsuario)";
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->query($sql);
+    $resultado->bindParam(':idUsuario', $idUsuario);
+
+
+    if ($resultado->rowCount() > 0){
+      $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
+      echo json_encode($carreras);
+    }else {
+    }
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+}); 
+$app->post('/api/preferencias/nuevo', function(Request $request, Response $response){
+  // ok postman
+  $idUsuario = $request->getParam('idUsuario');
+  $idCarrera = $request->getParam('idCarrera');
+  $idUniversidad = $request->getParam('idUniversidad');
+  $idCiudad = $request->getParam('idCiudad');
+
+  $sql = "INSERT INTO preferencias (idUsuario, idCarrera, idUniversidad, idCiudad) VALUES 
+  (:idUsuario, :idCarrera, :idUniversidad, :idCiudad)";
+
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+
+    $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->bindParam(':idCarrera', $idCarrera);
+    $resultado->bindParam(':idUniversidad', $idUniversidad);
+    $resultado->bindParam(':idCiudad', $idCiudad);
     
     $resultado->execute();    
     $resultado = null;
