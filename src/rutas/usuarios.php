@@ -909,15 +909,17 @@ $app->delete('/api/favoritos/eliminar', function(Request $request, Response $res
   }
 });
 $app->get('/api/tuRed', function(Request $request, Response $response){
-  // ok potzman????
+  // ok potzman
   $idUsuario = $request->getParam('idUsuario');
   $sql = "SELECT * FROM publicaciones WHERE idUsuario IN 
   (SELECT idAmigo FROM amigos WHERE status='A' AND idUsuario=:idUsuario)";
   try{
     $db = new db();
     $db = $db->conectDB();
-    $resultado = $db->query($sql);
+    $resultado = $db->prepare($sql);    
     $resultado->bindParam(':idUsuario', $idUsuario);
+    $resultado->execute();
+
     if ($resultado->rowCount() > 0){
       $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
       echo json_encode($carreras);
@@ -930,7 +932,7 @@ $app->get('/api/tuRed', function(Request $request, Response $response){
   }
 }); 
 $app->get('/api/parati', function(Request $request, Response $response){
-  // ok potzman?
+  // ok potzman
   $idUsuario = $request->getParam('idUsuario');
 
   $sql = "SELECT * FROM publicaciones WHERE 
@@ -939,12 +941,14 @@ $app->get('/api/parati', function(Request $request, Response $response){
   idCarrera IN (SELECT idCarrera FROM preferencias WHERE idUsuario=:idUsuario)
   OR
   idCiudad IN (SELECT idCiudad FROM preferencias WHERE idUsuario=:idUsuario)";
+
+
   try{
     $db = new db();
     $db = $db->conectDB();
-    $resultado = $db->query($sql);
+    $resultado = $db->prepare($sql);    
     $resultado->bindParam(':idUsuario', $idUsuario);
-
+    $resultado->execute();
 
     if ($resultado->rowCount() > 0){
       $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
@@ -957,6 +961,8 @@ $app->get('/api/parati', function(Request $request, Response $response){
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 }); 
+
+
 $app->post('/api/preferencias/nuevo', function(Request $request, Response $response){
   // ok postman
   $idUsuario = $request->getParam('idUsuario');
