@@ -294,7 +294,7 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
 
 
 // PUT Modificar cliente 
-$app->put('/api/usuarios/modificar/{id}', function(Request $request, Response $response){
+$app->post('/api/usuarios/modificar/{id}', function(Request $request, Response $response){
 
   $id = $request->getAttribute('id');
 
@@ -355,7 +355,7 @@ $app->put('/api/usuarios/modificar/{id}', function(Request $request, Response $r
 // Hola arik del futuro
 // no pienses en ella crack 
 //todo va a estar bien
-$app->put('/api/usuarios/modificarPass', function(Request $request, Response $response){
+$app->post('/api/usuarios/modificarPass', function(Request $request, Response $response){
 
   $email = $request->getAttribute('email');
   $oldPassword = $request->getAttribute('oldPassword');
@@ -403,7 +403,7 @@ $app->put('/api/usuarios/modificarPass', function(Request $request, Response $re
 }); 
 
 // DELETE borar cliente 
-$app->delete('/api/usuarios/delete/{id}', function(Request $request, Response $response){
+$app->post('/api/usuarios/delete/{id}', function(Request $request, Response $response){
    $id_Usuario = $request->getAttribute('id');
    $sql = "DELETE FROM usuarios WHERE idUsuario = $id_Usuario";
      
@@ -475,7 +475,7 @@ $app->get('/api/perfil/{id}', function(Request $request, Response $response){
   }
 }); 
 
-$app->put('/api/editarPerfil/{id}', function(Request $request, Response $response){
+$app->post('/api/editarPerfil/{id}', function(Request $request, Response $response){
 
   $id = $request->getAttribute('id');
 
@@ -708,7 +708,7 @@ $app->post('/api/solicitudAmistad', function(Request $request, Response $respons
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 });
-$app->put('/api/modAmistad', function(Request $request, Response $response){
+$app->post('/api/modAmistad', function(Request $request, Response $response){
   // ok postman 
   $idAmigo = $request->getParam('idAmigo');
   $idUsuario = $request->getParam('idUsuario');
@@ -886,7 +886,7 @@ $app->post('/api/favoritos/agregar', function(Request $request, Response $respon
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 });
-$app->delete('/api/favoritos/eliminar', function(Request $request, Response $response){
+$app->post('/api/favoritos/eliminar', function(Request $request, Response $response){
   // ok postman
   $idUsuario = $request->getParam('idUsuario');
   $idPublicacion = $request->getParam('idPublicacion');
