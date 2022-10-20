@@ -247,7 +247,6 @@ $app->get('/api/usuarios/{id}', function(Request $request, Response $response){
   }
 }); 
 
-
 // POST Crear nuevo cliente 
 $app->post('/api/usuarios/nuevo', function(Request $request, Response $response){
   // ok con postman
@@ -268,6 +267,7 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
   try{
     $db = new db();
     $db = $db->conectDB();
+   
     $resultado = $db->prepare($sql);
 
     $resultado->bindParam(':nombre', $nombre);
@@ -280,9 +280,11 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
     $resultado->bindParam(':tipoPerfil', $tipoPerfil);
     $resultado->bindParam(':descripcion', $descripcion);
     $resultado->bindParam(':trayectoria', $trayectoria);
-    $resultado->bindParam(':idCiudad', $idCiudad);
+    $resultado->bindParam(':idCiudad', $idCiudad); 
+    
     $resultado->execute();
-    echo json_encode("Nuevo usuario guardado.");  
+
+    echo json_encode($db->lastInsertId());  
 
     $resultado = null;
     $db = null;
@@ -290,8 +292,6 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 }); 
-
-
 
 // PUT Modificar cliente 
 $app->post('/api/usuarios/modificar/{id}', function(Request $request, Response $response){
@@ -328,7 +328,6 @@ $app->post('/api/usuarios/modificar/{id}', function(Request $request, Response $
     $db = new db();
     $db = $db->conectDB();
     $resultado = $db->prepare($sql);
-
     $resultado->bindParam(':nombre', $nombre);
     $resultado->bindParam(':apellido', $apellido);
     $resultado->bindParam(':fNac', $fNac);
@@ -340,7 +339,6 @@ $app->post('/api/usuarios/modificar/{id}', function(Request $request, Response $
     $resultado->bindParam(':descripcion', $descripcion);
     $resultado->bindParam(':trayectoria', $trayectoria);
     $resultado->bindParam(':idCiudad', $idCiudad);
-
     $resultado->execute();
     echo json_encode("Usuario modificado.");  
 
@@ -359,18 +357,10 @@ $app->post('/api/usuarios/modificarPass', function(Request $request, Response $r
 
   $email = $request->getAttribute('email');
   $oldPassword = $request->getAttribute('oldPassword');
-  $password = $request->getParam('password');
-    
-  
+  $password = $request->getParam('password');  
   $sql = "SELECT id from usuarios WHERE
-
           email = '$email' AND password='$oldPassword'
-
         ";
-
-
-
-     
   try{
     $db = new db();
     $db = $db->conectDB();
@@ -387,14 +377,9 @@ $app->post('/api/usuarios/modificarPass', function(Request $request, Response $r
 
 
     $resultado = $db->prepare($sql);
-
- 
     $resultado->bindParam(':password', $password);
-
-
     $resultado->execute();
     echo json_encode("Contraseña modificada.");  
-
     $resultado = null;
     $db = null;
   }catch(PDOException $e){
@@ -412,14 +397,12 @@ $app->post('/api/usuarios/delete/{id}', function(Request $request, Response $res
     $db = $db->conectDB();
     $resultado = $db->prepare($sql);
      $resultado->execute();
-
     if ($resultado->rowCount() > 0) {
       echo json_encode("Usuario eliminado.");  
     }else {
       echo json_encode("No existe usuario con este ID.");
     //LOL
     }
-
     $resultado = null;
     $db = null;
   }catch(PDOException $e){
@@ -433,8 +416,6 @@ $app->post('/api/login', function(Request $request, Response $response){
   $password = $request->getParam('password');
 
   $sql = "SELECT nombre, apellido, idUsuario, fNac, fotoPerfil, celular, tipoPerfil, descripcion, trayectoria, idCiudad FROM usuarios WHERE email = '$email' AND  password = '$password' ";
-
-
   try{
     $db = new db();
     $db = $db->conectDB();
@@ -461,7 +442,6 @@ $app->get('/api/perfil/{id}', function(Request $request, Response $response){
     $db = new db();
     $db = $db->conectDB();
     $resultado = $db->query($sql); 
-
     if ($resultado->rowCount() > 0){
       $usuario = $resultado->fetchAll(PDO::FETCH_OBJ);
       echo json_encode($usuario);
@@ -588,8 +568,6 @@ $app->post('/api/nuevaUniversidad', function(Request $request, Response $respons
     $db = new db();
     $db = $db->conectDB();
     $resultado = $db->query($sql); 
-
-
     if ($resultado->rowCount() > 0){
       $sql = "INSERT INTO usuarios (nombre, apellido, fNac, email, password, fotoPerfil, celular, 
               tipoPerfil, descripcion, trayectoria, idCiudad) 
@@ -597,7 +575,6 @@ $app->post('/api/nuevaUniversidad', function(Request $request, Response $respons
           (:nombre, :apellido, :fNac, :emailUni, :passwordUni, :fotoPerfil, :celular, 
           :tipoPerfil, :descripcion, :trayectoria, :idCiudad)";
           $resultado = $db->prepare($sql);
-
            $resultado->bindParam(':nombre', $nombre);
            $resultado->bindParam(':apellido', $apellido);
            $resultado->bindParam(':fNac', $fNac);
@@ -609,9 +586,7 @@ $app->post('/api/nuevaUniversidad', function(Request $request, Response $respons
            $resultado->bindParam(':descripcion', $descripcion);
            $resultado->bindParam(':trayectoria', $trayectoria);
            $resultado->bindParam(':idCiudad', $idCiudad);
-           $resultado->execute();
-    
-           
+           $resultado->execute();           
            echo("Universidad creada");
            $resultado = null;
           $db = null;
