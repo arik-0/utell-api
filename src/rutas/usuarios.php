@@ -921,12 +921,10 @@ $app->get('/api/parati', function(Request $request, Response $response){
   publicaciones.texto,
   publicaciones.likes,
   publicaciones.idCiudad,
-  universidades.nombre AS nombreUniv,
+  universidades.nombre as universidad,
   usuarios.nombre,
   usuarios.apellido,
-  sedes.nombre as nombreSede,
-  carrerassedes.descripcion,
-  ciudades.nombre as nombreCiudad
+  carrerassedes.descripcion
   FROM
   publicaciones
   Inner Join universidades ON publicaciones.idUniversidad = universidades.idUniversidad
@@ -950,7 +948,6 @@ $app->get('/api/parati', function(Request $request, Response $response){
     $resultado = $db->prepare($sql);    
     $resultado->bindParam(':idUsuario', $idUsuario);
     $resultado->execute();
-
     if ($resultado->rowCount() > 0){
       $carreras = $resultado->fetchAll(PDO::FETCH_OBJ);
       echo json_encode($carreras);
