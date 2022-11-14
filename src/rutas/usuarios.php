@@ -910,12 +910,38 @@ $app->get('/api/parati', function(Request $request, Response $response){
   // ok potzman
   $idUsuario = $request->getParam('idUsuario');
 
-  $sql = "SELECT * FROM publicaciones WHERE 
-  idUniversidad IN (SELECT idUniversidad FROM preferencias WHERE idUsuario=:idUsuario)
+  $sql = "SELECT
+  publicaciones.idPublicacion,
+  publicaciones.idUsuario,
+  publicaciones.fecha,
+  publicaciones.hora,
+  publicaciones.idUniversidad,
+  publicaciones.idSede,
+  publicaciones.idCarrera,
+  publicaciones.texto,
+  publicaciones.likes,
+  publicaciones.idCiudad,
+  universidades.nombre AS nombreUniv,
+  usuarios.nombre,
+  usuarios.apellido,
+  sedes.nombre as nombreSede,
+  carrerassedes.descripcion,
+  ciudades.nombre as nombreCiudad
+  FROM
+  publicaciones
+  Inner Join universidades ON publicaciones.idUniversidad = universidades.idUniversidad
+  Inner Join usuarios ON publicaciones.idUsuario = usuarios.idUsuario
+  Inner Join sedes ON universidades.idUniversidad = sedes.idUniversidad AND publicaciones.idSede = sedes.idSede
+  Inner Join carrerassedes ON publicaciones.idCarrera = carrerassedes.idCarrera AND publicaciones.idSede = carrerassedes.idSede
+  Inner Join ciudades ON publicaciones.idCiudad = ciudades.idCiudad
+  
+  
+  WHERE 
+  publicaciones.idUniversidad IN (SELECT idUniversidad FROM preferencias WHERE idUsuario=:idUsuario)
   OR
-  idCarrera IN (SELECT idCarrera FROM preferencias WHERE idUsuario=:idUsuario)
+  publicaciones.idCarrera IN (SELECT idCarrera FROM preferencias WHERE idUsuario=:idUsuario)
   OR
-  idCiudad IN (SELECT idCiudad FROM preferencias WHERE idUsuario=:idUsuario)";
+  publicaciones.idCiudad IN (SELECT idCiudad FROM preferencias WHERE idUsuario=:idUsuario)";
 
 
   try{
