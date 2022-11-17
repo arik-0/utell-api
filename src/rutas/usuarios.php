@@ -573,7 +573,9 @@ $app->post('/api/nuevaUniversidad', function(Request $request, Response $respons
               tipoPerfil, descripcion, trayectoria, idCiudad) 
               VALUES 
           (:nombre, :apellido, :fNac, :emailUni, :passwordUni, :fotoPerfil, :celular, 
-          :tipoPerfil, :descripcion, :trayectoria, :idCiudad)";
+          :tipoPerfil, :descripcion, :trayectoria, :idCiudad);
+          INSERT INTO universidades(nombre, email, password, celular, estado) 
+          VALUES(:nombre, :emailUni,:passwordUni, :celular, 'ACTIVO')";
           $resultado = $db->prepare($sql);
            $resultado->bindParam(':nombre', $nombre);
            $resultado->bindParam(':apellido', $apellido);
