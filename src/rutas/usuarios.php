@@ -6,6 +6,69 @@ $app = new \Slim\App;
 
 
 
+//include '../phpmailer/PHPMailerAutoload.php';
+
+/*
+require __DIR__ . '/../../phpmailer/Exception.php';
+require __DIR__ . '/../../phpmailer/PHPMailer.php';
+require __DIR__ . '/../../phpmailer/SMTP.php';
+
+function enviarMail($asunto, $destinatario, $cuerpo) {
+
+
+    $subject = $asunto;
+    $emailFrom = "utell.skolltech@gmail.com";
+    $emailReply = "utell.skolltech@gmail.com";
+  
+    $mensaje = $cuerpo;
+  
+    $mail = new PHPMailer;
+    $mail->CharSet = 'UTF-8';
+  
+    $mail->SMTPDebug = 2; 
+    $mail->Username = 'utell.skolltech@gmail.com';                 // SMTP username
+    $mail->Password = 'xpbcvlyxgmihvwic';                           // SMTP password
+    $mail->isSMTP();                                      // Set mailer to use SMTP
+    $mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
+    $mail->SMTPAuth = true;
+    $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+  
+    $mail->SMTPOptions = array(
+        'ssl' => array(
+          'verify_peer' => false,
+          'verify_peer_name' => false,
+          'allow_self_signed' => true
+        )
+      );
+  
+    $email = $destinatario;
+  
+      $mail->setFrom($emailFrom, 'U-Tell');
+      $mail->addReplyTo($emailReply, 'U-Tell');
+      $mail->addAddress($email);
+      // $mail->addCC('jorgephi@gmail.com');   // copia oculta
+  
+      $mail->Port = 25;                                    // TCP port to connect to
+  
+      $mail->isHTML(true);                                  // Set email format to HTML
+      $mail->Subject = $subject;
+      $mail->Body    =  $mensaje;
+  
+      if($mail->send()) {
+        echo '<br/>OK: '.$email.'<hr/>';
+        $mailEnviado = 1;
+      } else {
+        echo '<br/>ERRORRRRRRRRRR<hr/>';
+        $mailEnviado = 0;
+      }
+  
+
+}
+
+*/
+
+
+
 /*
 
 Método HTTP	Descripción
@@ -20,7 +83,10 @@ DELETE	Suprime un recurso.
 
 $app->get('/api/', function(Request $request, Response $response){
     echo("Bienvenido a la API");
-}); 
+
+  //  enviarMail("asunto", "jorgephi@gmail.com", "cuerpoMail");
+
+  }); 
 
 
 // GET Todos los clientes 
@@ -248,6 +314,7 @@ $app->get('/api/usuarios/{id}', function(Request $request, Response $response){
 }); 
 
 // POST Crear nuevo cliente 
+// POST Crear nuevo cliente
 $app->post('/api/usuarios/nuevo', function(Request $request, Response $response){
   // ok con postman
    $nombre = $request->getParam('nombre');
@@ -255,21 +322,25 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
    $fNac = $request->getParam('fNac');
    $email = $request->getParam('email');
    $password = $request->getParam('password');
-   $fotoPerfil = $request->getParam('fotoPerfil'); 
+   $fotoPerfil = $request->getParam('fotoPerfil');
    $celular = $request->getParam('celular');
    $tipoPerfil = $request->getParam('tipoPerfil');
    $descripcion = $request->getParam('descripcion');
    $trayectoria = $request->getParam('trayectoria');
-   $idCiudad = $request->getParam('idCiudad');     
-  
-  $sql = "INSERT INTO usuarios (nombre, apellido, fNac, email, password, fotoPerfil, celular, tipoPerfil, descripcion, trayectoria, idCiudad) VALUES 
-          (:nombre, :apellido, :fNac, :email, :password, :fotoPerfil, :celular, :tipoPerfil, :descripcion, :trayectoria, :idCiudad)";
+   $idCiudad = $request->getParam('idCiudad');    
+   $instagram = $request->getParam('instagram');
+   $twitter = $request->getParam('twitter');
+   $facebook = $request->getParam('facebook');
+  $sql = "INSERT INTO usuarios (nombre, apellido, fNac, email, password, fotoPerfil, celular, tipoPerfil, descripcion, trayectoria, idCiudad, instagram, twitter, facebook)
+  VALUES
+          (:nombre, :apellido, :fNac, :email, :password, :fotoPerfil, :celular, :tipoPerfil, :descripcion, :trayectoria, :idCiudad, :instagram, :twitter, :facebook)
+  VALUES )";
   try{
     $db = new db();
     $db = $db->conectDB();
    
     $resultado = $db->prepare($sql);
-
+ 
     $resultado->bindParam(':nombre', $nombre);
     $resultado->bindParam(':apellido', $apellido);
     $resultado->bindParam(':fNac', $fNac);
@@ -280,12 +351,14 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
     $resultado->bindParam(':tipoPerfil', $tipoPerfil);
     $resultado->bindParam(':descripcion', $descripcion);
     $resultado->bindParam(':trayectoria', $trayectoria);
-    $resultado->bindParam(':idCiudad', $idCiudad); 
-    
+    $resultado->bindParam(':idCiudad', $idCiudad);
+    $resultado->bindParam(':instagram', $instagram);
+    $resultado->bindParam(':twitter', $twitter);
+    $resultado->bindParam(':facebook', $facebook);
     $resultado->execute();
-
+ 
     echo json_encode($db->lastInsertId());  
-
+ 
     $resultado = null;
     $db = null;
   }catch(PDOException $e){
@@ -293,23 +366,26 @@ $app->post('/api/usuarios/nuevo', function(Request $request, Response $response)
   }
 }); 
 
-// PUT Modificar cliente 
+// PUT Modificar cliente
 $app->post('/api/usuarios/modificar/{id}', function(Request $request, Response $response){
-
+ 
   $id = $request->getAttribute('id');
-
+ 
   $nombre = $request->getParam('nombre');
   $apellido = $request->getParam('apellido');
   $fNac = $request->getParam('fNac');
   $email = $request->getParam('email');
   $password = $request->getParam('password');
-  $fotoPerfil = $request->getParam('fotoPerfil'); 
+  $fotoPerfil = $request->getParam('fotoPerfil');
   $celular = $request->getParam('celular');
   $tipoPerfil = $request->getParam('tipoPerfil');
   $descripcion = $request->getParam('descripcion');
   $trayectoria = $request->getParam('trayectoria');
-  $idCiudad = $request->getParam('idCiudad');     
-  
+  $idCiudad = $request->getParam('idCiudad');    
+  $instagram = $request->getParam('instagram');
+  $twitter = $request->getParam('twitter');
+  $facebook = $request->getParam('facebook');
+ 
   $sql = "UPDATE usuarios SET
           nombre = :nombre,
           apellido = :apellido,
@@ -322,6 +398,9 @@ $app->post('/api/usuarios/modificar/{id}', function(Request $request, Response $
           descripcion = :descripcion,
           trayectoria = :trayectoria,
           idCiudad = :idCiudad
+          instagram = :instagram
+          twitter = :twitter
+          facebook = :facebook
         WHERE idUsuario = $id";
      
   try{
@@ -339,15 +418,19 @@ $app->post('/api/usuarios/modificar/{id}', function(Request $request, Response $
     $resultado->bindParam(':descripcion', $descripcion);
     $resultado->bindParam(':trayectoria', $trayectoria);
     $resultado->bindParam(':idCiudad', $idCiudad);
+    $resultado->bindParam(':instagram', $instagram);
+    $resultado->bindParam(':twitter', $twitter);
+    $resultado->bindParam(':facebook', $facebook);
     $resultado->execute();
     echo json_encode("Usuario modificado.");  
-
+ 
     $resultado = null;
     $db = null;
   }catch(PDOException $e){
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
-}); 
+});
+
 
 //modificar contra xd 
 // Hola arik del futuro
@@ -730,7 +813,6 @@ $app->post('/api/reporte/nuevo', function(Request $request, Response $response){
     $resultado->bindParam(':texto', $texto);
     $resultado->bindParam(':tipo', $tipo);
     $resultado->execute();    
-    echo json_encode("Guiso");  
 
     $resultado = null;
     $db = null;
