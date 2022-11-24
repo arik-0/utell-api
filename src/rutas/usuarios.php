@@ -2,6 +2,9 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
+use PHPMailer\PHPMailer\PHPMailer;
+
+
 $app = new \Slim\App;
 
 
@@ -12,6 +15,8 @@ $app = new \Slim\App;
 require __DIR__ . '/../../phpmailer/Exception.php';
 require __DIR__ . '/../../phpmailer/PHPMailer.php';
 require __DIR__ . '/../../phpmailer/SMTP.php';
+*/
+
 
 function enviarMail($asunto, $destinatario, $cuerpo) {
 
@@ -25,7 +30,7 @@ function enviarMail($asunto, $destinatario, $cuerpo) {
     $mail = new PHPMailer;
     $mail->CharSet = 'UTF-8';
   
-    $mail->SMTPDebug = 2; 
+    /*$mail->SMTPDebug = 2;*/ 
     $mail->Username = 'utell.skolltech@gmail.com';                 // SMTP username
     $mail->Password = 'xpbcvlyxgmihvwic';                           // SMTP password
     $mail->isSMTP();                                      // Set mailer to use SMTP
@@ -65,7 +70,7 @@ function enviarMail($asunto, $destinatario, $cuerpo) {
 
 }
 
-*/
+
 
 
 
@@ -84,7 +89,7 @@ DELETE	Suprime un recurso.
 $app->get('/api/', function(Request $request, Response $response){
     echo("Bienvenido a la API");
 
-  //  enviarMail("asunto", "jorgephi@gmail.com", "cuerpoMail");
+    //enviarMail("asunto", "jorgephi@gmail.com", "cuerpoMail");
 
   }); 
 
@@ -454,15 +459,13 @@ $app->post('/api/usuarios/modificarPass', function(Request $request, Response $r
     if ($resultado->rowCount() > 0){
         $sql = "UPDATE usuarios SET
         password = :password,
-      WHERE email = $email";
+      WHERE email = ':email' ";
+      $resultado = $db->prepare($sql);
+      $resultado->bindParam(':password', $password);
+      $resultado->bindParam(':email', $email);
+      $resultado->execute();
+      echo json_encode("Contraseña modificada.");  
     }
-
-
-
-    $resultado = $db->prepare($sql);
-    $resultado->bindParam(':password', $password);
-    $resultado->execute();
-    echo json_encode("Contraseña modificada.");  
     $resultado = null;
     $db = null;
   }catch(PDOException $e){
@@ -546,7 +549,6 @@ $app->post('/api/editarPerfil/{id}', function(Request $request, Response $respon
   $apellido = $request->getParam('apellido');
   $fNac = $request->getParam('fNac');
   $email = $request->getParam('email');
-  $password = $request->getParam('password');
   $fotoPerfil = $request->getParam('fotoPerfil'); 
   $celular = $request->getParam('celular');
   $tipoPerfil = $request->getParam('tipoPerfil');
@@ -559,7 +561,6 @@ $app->post('/api/editarPerfil/{id}', function(Request $request, Response $respon
           apellido = :apellido,
           fNac = :fNac,
           email = :email,
-          password = :password,
           fotoPerfil = :fotoPerfil,
           celular = :celular,
           tipoPerfil = :tipoPerfil,
@@ -577,7 +578,6 @@ $app->post('/api/editarPerfil/{id}', function(Request $request, Response $respon
     $resultado->bindParam(':apellido', $apellido);
     $resultado->bindParam(':fNac', $fNac);
     $resultado->bindParam(':email', $email);
-    $resultado->bindParam(':password', $password);
     $resultado->bindParam(':fotoPerfil', $fotoPerfil);
     $resultado->bindParam(':celular', $celular);
     $resultado->bindParam(':tipoPerfil', $tipoPerfil);
@@ -1073,3 +1073,60 @@ $app->post('/api/preferencias/nuevo', function(Request $request, Response $respo
     echo '{"error" : {"text":'.$e->getMessage().'}';
   }
 });
+$app->post('/api/recuperarPass', function(Request $request, Response $response){
+  // ok postman 
+
+
+  // en lugar de la variable email, decia idAmigo. Ya probe y anda ok!
+  $email = $request->getParam('email'); 
+  $codigo = rand(1111, 9999);
+  $sql = "UPDATE usuarios SET codigo = :codigo WHERE email=:email";
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+    $resultado->bindParam(':email', $email);
+    $resultado->bindParam(':codigo', $codigo);
+    $resultado->execute();
+    echo("funca");
+    enviarMail("Recuperacion de contraseña", $email, "Tu codigo de recuperacion es:".$codigo);
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+//
+//enviarMail("asunto", "jorgephi@gmail.com", "cuerpoMail");
+$app->post('/api/confirRec', function(Request $request, Response $response){
+  // 
+  $email = $request->getParam('email');
+  $codigoU = $request->getParam('codigoU');
+  $newPass = $request->getParam('newPass'); 
+  $sql = "SELECT * FROM usuarios WHERE email=:email AND codigo=:codigo";
+
+  try{
+    $db = new db();
+    $db = $db->conectDB();
+    $resultado = $db->prepare($sql);
+    $resultado->bindParam(':email', $email);
+    $resultado->bindParam(':codigo', $codigoU);
+    $resultado->bindParam(':newPass', $newPass);
+    if ($resultado->rowCount() > 0){     
+        $sql = "UPDATE usuarios SET password=:password WHERE email=:email";
+      /*  "UPDATE usuarios SET
+        password = :password,
+      WHERE email = ':email' ";*/
+    }else {
+      echo("Error: codigo equivocado");
+    }
+    $resultado->execute();
+    echo("funca");
+    $resultado = null;
+    $db = null;
+  }catch(PDOException $e){
+    echo '{"error" : {"text":'.$e->getMessage().'}';
+  }
+});
+//hola jorge, quieres un globito que flota por arte de magia?
